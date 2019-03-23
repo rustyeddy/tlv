@@ -24,3 +24,24 @@ In this case it makes sense to use a protocol that is very simple,
 yet does require a "tight coupleing" between the applicaitons that are 
 communicating.
 
+The type of message will determine how long it is, and how much data
+it can pass around.
+
+Short Code:
+
+```
++----+----+
+|1        |  ~ 1 - byte compact message
++----+----+
+      Type Only
+
++----+----+----+----+
+|01       |         | ~ 2 - byte short message
++----+----+----+----+
+      Type & Length 
+
++----+----+----+----+----+----+
+|00       |         |     ....  ~ 2 - 256bytes (2^7)
++----+----+----+----+----+----+
+      Type Length & Data
+```
