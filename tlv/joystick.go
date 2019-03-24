@@ -21,7 +21,9 @@ func (j *Joystick) Calibrate(x, y, sw int) {
 
 func (j *Joystick) Update(x, y, sw int) {
 
-	// TODO must do a better job of calibrating
+	// TODO must do a better job of calibrating, this assumes the first packet 
+	// we read will be an accurate reading of the joystick in its nutural(sp?) 
+	// position
 	if j.zeroX == 0 || j.zeroY == 0 {
 		j.Calibrate(x, y, sw)
 		return
