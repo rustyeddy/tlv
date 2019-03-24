@@ -28,7 +28,7 @@ func (j *Joystick) Update(x, y, sw int) {
 	}
 
 	if config.Debug {
-		log.Printf("update %d %d %d\n", x, y, sw)
+		//log.Printf("update %d %d %d\n", x, y, sw)
 	}
 
 	// check for movement along the X
