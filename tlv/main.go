@@ -7,50 +7,63 @@ import (
 	"strconv"
 	"strings"
 
+	// switch to the term package?
 	"github.com/tarm/serial"
 )
 
 type Config struct {
-	Baud  int
-	Debug bool
-	Port  string
+	Baud    int
+	Debug   bool
+	Serial  string
+	Serial2 string
 
 	PinX, PinY, PinSW int
 }
 
 var (
-	config Config
-	joy    *Joystick
+	ser1, ser2 io.ReadWriteCloser
+	config     Config
+	joy        *Joystick
 )
 
 func init() {
 	//flag.StringVar(&config.Port, "port", "/dev/tty.wchusbserial1420", "serial port")
-	flag.StringVar(&config.Port, "port", "/dev/tty.usbserial-14110", "serial port")
-	flag.IntVar(&config.Baud, "baud", 9600, "baud rate")
+	flag.StringVar(&config.Serial, "serial", "/dev/tty.usbserial-14110", "serial port")
+	flag.StringVar(&config.Serial2, "serial2", "/dev/tty.usbserial15410", "serial port2")
+	flag.IntVar(&config.Baud, "baud", 115200, "baud rate")
 	flag.BoolVar(&config.Debug, "debug", true, "turn debug on or off")
 	joy = NewJoystick()
 }
 
 func main() {
 	flag.Parse()
-	config := &serial.Config{
-		Name:        config.Port,
+
+	// switch to term?
+	//t, err := term.Open("/dev/ttyUSB0", Speed(19200), RawMode)
+	ser1 := getSerialStream(config.Serial)
+	ser2 := getSerialStream(config.Serial2)
+	readStreams(ser1, ser2)
+}
+
+func getSerialStream(port string) io.ReadWriteCloser {
+
+	sercfg := &serial.Config{
+		Name:        port,
 		Baud:        config.Baud,
 		ReadTimeout: 1,
 		Size:        8,
 	}
-
-	stream, err := serial.OpenPort(config)
+	stream, err := serial.OpenPort(sercfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	readLoop(stream)
+	return stream
 }
 
-func readLoop(stream io.Reader) {
+func readStreams(s1, s2 io.ReadWriteCloser) {
 	buf := make([]byte, 16)
 	for {
-		n, err := stream.Read(buf)
+		n, err := s1.Read(buf)
 		if err != nil && err != io.EOF {
 			log.Println(err)
 		}
